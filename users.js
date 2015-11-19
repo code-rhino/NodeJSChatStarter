@@ -6,6 +6,3 @@ function User(){
  
 }
 
-User.setup = function(){
-	return "Setup";
-}
