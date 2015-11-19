@@ -10,6 +10,8 @@ var router = express();
 var server = http.createServer(router);
 var io = socketio.listen(server);
 
+var userMgr = require('./users.js');
+
 router.use(express.static(path.resolve(__dirname, 'client')));
 
 var messages = [];
@@ -18,7 +20,6 @@ var sockets = [];
 io.on('connection', function (socket) {
     messages.forEach(function (data) {
       socket.emit('message', data);
-      console.log("Number of sockets " + sockets.length);
     });
 
     sockets.push(socket);
@@ -26,7 +27,6 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
       sockets.splice(sockets.indexOf(socket), 1);
       updateRoster();
-      console.log("Number of sockets " + sockets.length);
     });
 
     socket.on('message', function (msg) {
@@ -47,9 +47,6 @@ io.on('connection', function (socket) {
     socket.on('identify', function (name) {
       socket.name = String(name || 'Anonymous');
       updateRoster();
-      /*socket.set('name', String(name || 'Anonymous'), function (err) {
-        updateRoster();
-      });*/
     });
   });
 
@@ -57,6 +54,7 @@ function updateRoster(){
 	async.map(
 		sockets, 
 		function(socket, callback){
+			callback(null, socket.name);
 			//socket.get('name', callback);
 		},
 		function(err, names){
